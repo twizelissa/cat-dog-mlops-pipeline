@@ -20,6 +20,7 @@ from fastapi import FastAPI, File, UploadFile, HTTPException, BackgroundTasks, R
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
 import tensorflow as tf
@@ -32,8 +33,28 @@ from preprocessing import ImagePreprocessor, get_dataset_statistics
 from model import CatsDogsModel
 from prediction import Predictor
 
+# Environment configuration
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'development')
+
 # Initialize FastAPI app
 app = FastAPI(title="Cats vs Dogs Classification API", version="1.0.0")
+
+# Configure CORS with environment-aware origins
+if ENVIRONMENT == 'production':
+    allowed_origins = [
+        os.getenv('FRONTEND_URL', 'https://catdog-ml-frontend.onrender.com'),
+        "https://*.onrender.com",
+    ]
+else:
+    allowed_origins = ["*"]  # Allow all in development
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Mount static files and templates
 app.mount("/static", StaticFiles(directory="app/static"), name="static")

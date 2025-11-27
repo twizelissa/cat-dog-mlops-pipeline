@@ -1,0 +1,46 @@
+# Render Deployment - Files to Ignore
+
+# Development files
+notebook/
+*.ipynb
+.ipynb_checkpoints/
+
+# Data (use cloud storage instead)
+archive/
+data/train/
+data/test/
+data/retrain/
+
+# Virtual environment
+venv/
+env/
+
+# Node modules (will be reinstalled)
+frontend/node_modules/
+
+# Build artifacts
+frontend/.next/
+frontend/out/
+__pycache__/
+*.pyc
+
+# IDE and system files
+.vscode/
+.idea/
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Test and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Large data files
+*.zip
+*.tar.gz
+
+# Local environment
+.env.local

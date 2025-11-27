@@ -154,18 +154,20 @@ export default function Predict() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-white rounded-lg p-4 shadow">
                     <p className="text-sm text-gray-500 mb-1">Class</p>
-                    <p className={`text-2xl font-bold ${
-                      prediction.class === 'unknown' 
-                        ? 'text-orange-600' 
-                        : prediction.class === 'cats' 
-                        ? 'text-blue-600' 
-                        : 'text-green-600'
-                    }`}>
-                      {prediction.class === 'unknown' 
-                        ? (prediction.message || 'Not a Cat or Dog')
-                        : prediction.class === 'cats' 
-                        ? 'Cat' 
-                        : 'Dog'}
+                    <p
+                      className={`text-2xl font-bold ${
+                        prediction.class === "unknown"
+                          ? "text-orange-600"
+                          : prediction.class === "cats"
+                          ? "text-blue-600"
+                          : "text-green-600"
+                      }`}
+                    >
+                      {prediction.class === "unknown"
+                        ? prediction.message || "Not a Cat or Dog"
+                        : prediction.class === "cats"
+                        ? "Cat"
+                        : "Dog"}
                     </p>
                   </div>
                   <div className="bg-white rounded-lg p-4 shadow">
