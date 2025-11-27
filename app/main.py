@@ -4,10 +4,14 @@ Provides REST API and web interface for predictions and retraining
 """
 
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+
 import sys
 import io
 import json
 import shutil
+import gc
 from pathlib import Path
 from datetime import datetime
 from typing import List, Optional
@@ -24,6 +28,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
 import tensorflow as tf
+
+# Configure TensorFlow memory
+tf.config.set_soft_device_placement(True)
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+    try:
+        for gpu in gpus:
+            tf.config.experimental.set_memory_growth(gpu, True)
+    except RuntimeError as e:
+        print(e)
+
 from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2, preprocess_input, decode_predictions
 
 # Add src to path
@@ -89,15 +104,16 @@ detector_model = None
 try:
     model_path = MODEL_DIR / 'cats_dogs_model.h5'
     if model_path.exists():
+        tf.keras.backend.clear_session()
+        gc.collect()
         predictor = Predictor(model_path=str(model_path))
         print("Model loaded successfully")
     else:
         print("No trained model found. Please train a model first.")
     
-    # Load MobileNetV2 for object detection
-    print("Loading MobileNetV2 detector...")
-    detector_model = MobileNetV2(weights='imagenet', include_top=True)
-    print("MobileNetV2 detector loaded successfully")
+    # Lazy load MobileNetV2 - only when needed
+    detector_model = None
+    print("Detector will be loaded on first prediction")
 except Exception as e:
     print(f"Error loading model: {e}")
 
@@ -225,10 +241,22 @@ async def get_dataset_stats():
     }
 
 
+def get_detector():
+    """Lazy load detector only when needed"""
+    global detector_model
+    if detector_model is None:
+        try:
+            print("Loading MobileNetV2 detector...")
+            detector_model = MobileNetV2(weights='imagenet', include_top=True)
+            print("MobileNetV2 detector loaded")
+        except Exception as e:
+            print(f"Error loading detector: {e}")
+    return detector_model
+
 @app.post("/api/predict")
 async def predict_image(file: UploadFile = File(...)):
     """Predict class for uploaded image"""
-    global predictor, detector_model
+    global predictor
     
     if predictor is None:
         raise HTTPException(status_code=503, detail="Model not loaded")
@@ -245,15 +273,20 @@ async def predict_image(file: UploadFile = File(...)):
         image = Image.open(io.BytesIO(contents)).convert('RGB')
         
         # Step 1: Detect if image contains cat or dog using MobileNetV2
-        if detector_model is not None:
+        detector = get_detector()
+        if detector is not None:
             detector_image = image.resize((224, 224))
             detector_array = np.array(detector_image)
             detector_array = np.expand_dims(detector_array, axis=0)
             detector_array = preprocess_input(detector_array)
             
             # Get predictions from detector
-            detector_predictions = detector_model.predict(detector_array, verbose=0)
+            detector_predictions = detector.predict(detector_array, verbose=0)
             decoded = decode_predictions(detector_predictions, top=5)[0]
+            
+            # Clear memory
+            del detector_array, detector_predictions
+            gc.collect()
             
             # Check if any of top 5 predictions are cat or dog related
             cat_dog_classes = [
@@ -304,9 +337,14 @@ async def predict_image(file: UploadFile = File(...)):
         # Update stats
         app_state['total_predictions'] += 1
         
+        # Clear memory
+        del img_array, image_bytes
+        gc.collect()
+        
         return result
         
     except Exception as e:
+        gc.collect()
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
 
 
@@ -355,6 +393,10 @@ async def retrain_model_task():
         app_state['is_retraining'] = True
         print("Starting model retraining...")
         
+        # Clear memory before retraining
+        tf.keras.backend.clear_session()
+        gc.collect()
+        
         # Check if retrain data exists
         if not RETRAIN_DATA_DIR.exists() or not any(RETRAIN_DATA_DIR.iterdir()):
             print("No retraining data available")
@@ -394,7 +436,9 @@ async def retrain_model_task():
             MODEL_DIR / 'cats_dogs_model.h5'
         )
         
-        # Reload predictor
+        # Clear session and reload predictor
+        tf.keras.backend.clear_session()
+        gc.collect()
         predictor = Predictor(model_path=str(MODEL_DIR / 'cats_dogs_model.h5'))
         
         # Update state
@@ -403,8 +447,12 @@ async def retrain_model_task():
         
         print("Model retraining completed successfully")
         
+        # Final cleanup
+        gc.collect()
+        
     except Exception as e:
         print(f"Error during retraining: {e}")
+        gc.collect()
     finally:
         app_state['is_retraining'] = False
 
