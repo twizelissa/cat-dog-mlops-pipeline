@@ -1,0 +1,17 @@
+{
+    "architecture": "VGG16 Transfer Learning",
+    "input_shape": [
+        224,
+        224,
+        3
+    ],
+    "classes": [
+        "cats",
+        "dogs"
+    ],
+    "batch_size": 32,
+    "epochs_trained": 25,
+    "optimizer": "Adam",
+    "learning_rate": 0.0001,
+    "created_at": "2025-11-26T15:57:56.492119"
+}

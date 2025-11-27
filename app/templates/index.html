@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title }} - Cats vs Dogs Classifier</title>
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-brand">
+          <h1>Cats vs Dogs Classifier</h1>
+          <p class="subtitle">Machine Learning Operations Platform</p>
+        </div>
+        <ul class="nav-menu">
+          <li><a href="/" class="nav-link active">Home</a></li>
+          <li><a href="/predict-page" class="nav-link">Predict</a></li>
+          <li><a href="/retrain-page" class="nav-link">Retrain</a></li>
+          <li><a href="/monitoring" class="nav-link">Monitor</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <main class="container">
+      <section class="hero">
+        <h2 class="hero-title">Image Classification Platform</h2>
+        <p class="hero-subtitle">
+          Advanced machine learning model for real-time cat and dog
+          classification
+        </p>
+
+        <div class="status-card">
+          <div class="status-header">
+            <h3>System Status</h3>
+            <span class="status-indicator online" id="statusIndicator"
+              >Online</span
+            >
+          </div>
+          <div class="status-grid">
+            <div class="status-item">
+              <span class="status-label">Model Status</span>
+              <span class="status-value" id="modelStatus">Loading...</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Uptime</span>
+              <span class="status-value" id="uptime">0h 0m 0s</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Total Predictions</span>
+              <span class="status-value" id="totalPredictions">0</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Retraining Status</span>
+              <span class="status-value" id="retrainStatus">Idle</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="features">
+        <h3 class="section-title">Platform Features</h3>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="feature-icon">🔍</div>
+            <h4>Real-time Prediction</h4>
+            <p>
+              Upload images and get instant predictions with confidence scores
+              using transfer learning with VGG16
+            </p>
+            <a href="/predict-page" class="btn btn-secondary"
+              >Make Prediction</a
+            >
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🔄</div>
+            <h4>Model Retraining</h4>
+            <p>
+              Upload new data and retrain the model to improve accuracy and
+              adapt to new patterns
+            </p>
+            <a href="/retrain-page" class="btn btn-secondary">Retrain Model</a>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h4>Performance Monitoring</h4>
+            <p>
+              Track model performance, visualize metrics, and monitor system
+              health in real-time
+            </p>
+            <a href="/monitoring" class="btn btn-secondary">View Analytics</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="metrics-section">
+        <h3 class="section-title">Model Performance Metrics</h3>
+        <div class="metrics-grid" id="metricsGrid">
+          <div class="metric-card">
+            <span class="metric-label">Accuracy</span>
+            <span class="metric-value" id="accuracy">--</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Precision</span>
+            <span class="metric-value" id="precision">--</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Recall</span>
+            <span class="metric-value" id="recall">--</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">F1 Score</span>
+            <span class="metric-value" id="f1score">--</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">ROC-AUC</span>
+            <span class="metric-value" id="rocauc">--</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="dataset-section">
+        <h3 class="section-title">Dataset Statistics</h3>
+        <div class="dataset-grid" id="datasetGrid">
+          <div class="dataset-card">
+            <h4>Training Data</h4>
+            <div class="dataset-stats" id="trainStats">
+              <p>Loading...</p>
+            </div>
+          </div>
+          <div class="dataset-card">
+            <h4>Testing Data</h4>
+            <div class="dataset-stats" id="testStats">
+              <p>Loading...</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>
+        Machine Learning Operations Platform | Built with FastAPI and TensorFlow
+      </p>
+    </footer>
+
+    <script src="/static/js/main.js"></script>
+    <script>
+      // Auto-refresh status every 5 seconds
+      setInterval(loadStatus, 5000);
+      setInterval(loadMetrics, 10000);
+
+      // Initial load
+      loadStatus();
+      loadMetrics();
+      loadDatasetStats();
+    </script>
+  </body>
+</html>

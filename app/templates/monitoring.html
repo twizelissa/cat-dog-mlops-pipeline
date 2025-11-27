@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title }} - Cats vs Dogs Classifier</title>
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-brand">
+          <h1>Cats vs Dogs Classifier</h1>
+          <p class="subtitle">Machine Learning Operations Platform</p>
+        </div>
+        <ul class="nav-menu">
+          <li><a href="/" class="nav-link">Home</a></li>
+          <li><a href="/predict-page" class="nav-link">Predict</a></li>
+          <li><a href="/retrain-page" class="nav-link">Retrain</a></li>
+          <li><a href="/monitoring" class="nav-link active">Monitor</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <main class="container">
+      <section class="monitoring-section">
+        <h2 class="page-title">Model Monitoring Dashboard</h2>
+        <p class="page-description">
+          Real-time performance metrics and system analytics
+        </p>
+
+        <div class="monitoring-grid">
+          <div class="monitor-card">
+            <h3>System Health</h3>
+            <div class="health-status">
+              <div class="health-indicator online" id="healthIndicator">
+                <span class="pulse"></span>
+                Online
+              </div>
+            </div>
+            <div class="health-details">
+              <div class="health-item">
+                <span class="health-label">Uptime</span>
+                <span class="health-value" id="uptimeValue">0h 0m 0s</span>
+              </div>
+              <div class="health-item">
+                <span class="health-label">Model Status</span>
+                <span class="health-value" id="modelStatusValue">Loaded</span>
+              </div>
+              <div class="health-item">
+                <span class="health-label">API Response</span>
+                <span class="health-value success">Healthy</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="monitor-card">
+            <h3>Usage Statistics</h3>
+            <div class="stats-grid">
+              <div class="stat-item">
+                <span class="stat-value" id="totalPredictionsValue">0</span>
+                <span class="stat-label">Total Predictions</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value" id="totalRetrainsValue">0</span>
+                <span class="stat-label">Total Retrains</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="metrics-dashboard">
+          <h3>Performance Metrics</h3>
+          <div class="metrics-chart-container">
+            <canvas id="metricsChart"></canvas>
+          </div>
+        </div>
+
+        <div class="dataset-visualization">
+          <h3>Dataset Distribution</h3>
+          <div class="charts-grid">
+            <div class="chart-container">
+              <h4>Training Data</h4>
+              <canvas id="trainChart"></canvas>
+            </div>
+            <div class="chart-container">
+              <h4>Testing Data</h4>
+              <canvas id="testChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="metrics-table-container">
+          <h3>Detailed Metrics</h3>
+          <table class="metrics-table">
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>Value</th>
+                <th>Percentage</th>
+              </tr>
+            </thead>
+            <tbody id="metricsTableBody">
+              <tr>
+                <td>Accuracy</td>
+                <td id="tableAccuracy">--</td>
+                <td>
+                  <div class="progress-bar">
+                    <div class="progress-fill" id="barAccuracy"></div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>Precision</td>
+                <td id="tablePrecision">--</td>
+                <td>
+                  <div class="progress-bar">
+                    <div class="progress-fill" id="barPrecision"></div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>Recall</td>
+                <td id="tableRecall">--</td>
+                <td>
+                  <div class="progress-bar">
+                    <div class="progress-fill" id="barRecall"></div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>F1 Score</td>
+                <td id="tableF1">--</td>
+                <td>
+                  <div class="progress-bar">
+                    <div class="progress-fill" id="barF1"></div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>ROC-AUC</td>
+                <td id="tableROC">--</td>
+                <td>
+                  <div class="progress-bar">
+                    <div class="progress-fill" id="barROC"></div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>
+        Machine Learning Operations Platform | Built with FastAPI and TensorFlow
+      </p>
+    </footer>
+
+    <script src="/static/js/monitoring.js"></script>
+  </body>
+</html>

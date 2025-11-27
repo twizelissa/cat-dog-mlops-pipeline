@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title }} - Cats vs Dogs Classifier</title>
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-brand">
+          <h1>Cats vs Dogs Classifier</h1>
+          <p class="subtitle">Machine Learning Operations Platform</p>
+        </div>
+        <ul class="nav-menu">
+          <li><a href="/" class="nav-link">Home</a></li>
+          <li><a href="/predict-page" class="nav-link">Predict</a></li>
+          <li><a href="/retrain-page" class="nav-link active">Retrain</a></li>
+          <li><a href="/monitoring" class="nav-link">Monitor</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <main class="container">
+      <section class="retrain-section">
+        <h2 class="page-title">Model Retraining</h2>
+        <p class="page-description">
+          Upload new images to improve model accuracy and performance
+        </p>
+
+        <div class="retrain-status-card" id="retrainStatusCard">
+          <h3>Retraining Status</h3>
+          <div class="status-content">
+            <div class="status-indicator" id="retrainIndicator">Idle</div>
+            <p id="retrainMessage">Ready to retrain with new data</p>
+          </div>
+        </div>
+
+        <div class="upload-section">
+          <h3>Upload Training Data</h3>
+
+          <div class="class-selector">
+            <label class="radio-card">
+              <input type="radio" name="class" value="cats" checked />
+              <div class="radio-content">
+                <span class="radio-icon">🐱</span>
+                <span class="radio-label">Cats</span>
+              </div>
+            </label>
+            <label class="radio-card">
+              <input type="radio" name="class" value="dogs" />
+              <div class="radio-content">
+                <span class="radio-icon">🐶</span>
+                <span class="radio-label">Dogs</span>
+              </div>
+            </label>
+          </div>
+
+          <div class="multi-upload-area" id="multiUploadArea">
+            <div class="upload-icon">📁</div>
+            <p class="upload-text">Drag and drop multiple images here</p>
+            <p class="upload-subtext">or</p>
+            <input
+              type="file"
+              id="multiImageInput"
+              accept="image/*"
+              multiple
+              style="display: none"
+            />
+            <button
+              class="btn btn-primary"
+              onclick="document.getElementById('multiImageInput').click()"
+            >
+              Select Multiple Images
+            </button>
+          </div>
+
+          <div class="file-list" id="fileList" style="display: none">
+            <h4>Selected Files (<span id="fileCount">0</span>)</h4>
+            <div id="filesContainer"></div>
+            <div class="button-group">
+              <button class="btn btn-success" id="uploadBtn">
+                Upload Files
+              </button>
+              <button class="btn btn-secondary" onclick="clearFiles()">
+                Clear All
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="retrain-control">
+          <h3>Trigger Retraining</h3>
+          <p>
+            Start the retraining process using uploaded data. This will improve
+            the model based on new examples.
+          </p>
+          <button class="btn btn-primary btn-large" id="retrainBtn">
+            Start Retraining
+          </button>
+        </div>
+
+        <div class="upload-history" id="uploadHistory">
+          <h3>Upload Summary</h3>
+          <div class="history-content" id="historyContent">
+            <p class="empty-state">No uploads yet</p>
+          </div>
+        </div>
+
+        <div class="loading-overlay" id="loadingOverlay" style="display: none">
+          <div class="spinner"></div>
+          <p id="loadingText">Processing...</p>
+        </div>
+
+        <div
+          class="success-message"
+          id="successMessage"
+          style="display: none"
+        ></div>
+        <div
+          class="error-message"
+          id="errorMessage"
+          style="display: none"
+        ></div>
+      </section>
+
+      <section class="info-section">
+        <h3 class="section-title">Retraining Process</h3>
+        <div class="steps-grid">
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <h4>Upload Data</h4>
+            <p>Select class and upload multiple images</p>
+          </div>
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <h4>Trigger Retrain</h4>
+            <p>Click the retrain button to start the process</p>
+          </div>
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <h4>Model Updates</h4>
+            <p>Model learns from new data and improves</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>
+        Machine Learning Operations Platform | Built with FastAPI and TensorFlow
+      </p>
+    </footer>
+
+    <script src="/static/js/retrain.js"></script>
+  </body>
+</html>
