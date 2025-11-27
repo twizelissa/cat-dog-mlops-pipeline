@@ -76,7 +76,7 @@ venv.bak/
 Thumbs.db
 
 # Project specific
-models/*.h5
+# models/*.h5  # Temporarily allowing for deployment
 models/cats_dogs_model/
 app/uploads/*
 !app/uploads/.gitkeep
@@ -84,7 +84,7 @@ data/retrain/
 *.log
 predictions_log.json
 
-# Large files
-*.h5
+# Large files (excluding required model)
+# *.h5  # Temporarily allowing cats_dogs_model.h5 for deployment
 *.tf
 *.pkl
