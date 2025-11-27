@@ -1,30 +1,10 @@
 services:
-  # Backend API Service
   - type: web
-    name: catdog-ml-backend
-    runtime: python
-    buildCommand: chmod +x build.sh && ./build.sh
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    name: catdog-ml-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile.render
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.12.0
-      - key: MODEL_PATH
-        value: /opt/render/project/src/models/cats_dogs_model.h5
       - key: ENVIRONMENT
         value: production
     healthCheckPath: /health
-    autoDeploy: true
-    
-  # Frontend Service
-  - type: web
-    name: catdog-ml-frontend
-    runtime: node
-    buildCommand: cd frontend && npm install && npm run build
-    startCommand: cd frontend && npm start
-    envVars:
-      - key: NODE_VERSION
-        value: 18.17.0
-      - key: NEXT_PUBLIC_API_URL
-        sync: false
-    healthCheckPath: /
     autoDeploy: true
