@@ -8,14 +8,19 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy Python requirements (updated 2024-11-27 with pandas 2.2.0)
-COPY requirements-prod.txt .
-
-# Verify requirements content for debugging
-RUN echo "=== Requirements file content ===" && cat requirements-prod.txt && echo "=== End requirements ==="
-
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements-prod.txt
+# Install Python dependencies directly (avoiding cache issues)
+RUN pip install --no-cache-dir \
+    tensorflow==2.20.0 \
+    keras==3.12.0 \
+    numpy==1.26.4 \
+    fastapi==0.103.0 \
+    uvicorn[standard]==0.23.2 \
+    python-multipart==0.0.6 \
+    Pillow==10.0.0 \
+    pandas==2.2.0 \
+    scikit-learn==1.5.0 \
+    python-dotenv==1.0.0 \
+    pydantic==2.3.0
 
 # Copy application code
 COPY src/ ./src/
