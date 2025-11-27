@@ -13,7 +13,7 @@ import shutil
 import gc
 from pathlib import Path
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 import numpy as np
 from PIL import Image
 
