@@ -1,6 +1,6 @@
 """
 FastAPI Application for Cats vs Dogs Classification
-Provides REST API and web interface for predictions and retraining
+Memory-optimized for Render free tier deployment
 """
 
 import os
@@ -8,19 +8,16 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 import sys
-import io
 import json
 import shutil
 import gc
 from pathlib import Path
 from datetime import datetime
-from typing import List, Optional
-import asyncio
-import time
+from typing import Optional
 import numpy as np
 from PIL import Image
 
-from fastapi import FastAPI, File, UploadFile, HTTPException, BackgroundTasks, Request
+from fastapi import FastAPI, File, UploadFile, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -28,40 +25,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
 import tensorflow as tf
+from tensorflow.keras.preprocessing.image import img_to_array, load_img
 
-# Configure TensorFlow memory
+# Configure TensorFlow memory - CRITICAL for Render free tier
 tf.config.set_soft_device_placement(True)
-gpus = tf.config.experimental.list_physical_devices('GPU')
-if gpus:
-    try:
-        for gpu in gpus:
-            tf.config.experimental.set_memory_growth(gpu, True)
-    except RuntimeError as e:
-        print(e)
-
-from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2, preprocess_input, decode_predictions
-
-# Add src to path
-sys.path.append(str(Path(__file__).parent.parent / 'src'))
-
-from preprocessing import ImagePreprocessor, get_dataset_statistics
-from model import CatsDogsModel
-from prediction import Predictor
-
-# Environment configuration
-ENVIRONMENT = os.getenv('ENVIRONMENT', 'development')
 
 # Initialize FastAPI app
 app = FastAPI(title="Cats vs Dogs Classification API", version="1.0.0")
 
-# Configure CORS with environment-aware origins
+# Configure CORS
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'development')
 if ENVIRONMENT == 'production':
-    allowed_origins = [
-        os.getenv('FRONTEND_URL', 'https://catdog-ml-frontend.onrender.com'),
-        "https://*.onrender.com",
-    ]
+    allowed_origins = ["*"]  # Permissive for demo
 else:
-    allowed_origins = ["*"]  # Allow all in development
+    allowed_origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -85,6 +62,8 @@ RETRAIN_DATA_DIR = DATA_DIR / 'retrain'
 # Ensure directories exist
 UPLOAD_DIR.mkdir(exist_ok=True)
 RETRAIN_DATA_DIR.mkdir(exist_ok=True)
+for class_dir in ['cats', 'dogs']:
+    (RETRAIN_DATA_DIR / class_dir).mkdir(parents=True, exist_ok=True)
 
 # Global state
 app_state = {
@@ -95,27 +74,40 @@ app_state = {
     'last_retrain': None
 }
 
-# Initialize components
-preprocessor = ImagePreprocessor(img_size=(224, 224), batch_size=32)
-predictor = None
-detector_model = None
+# Model variable
+model = None
 
-# Try to load existing model
-try:
-    model_path = MODEL_DIR / 'cats_dogs_model.h5'
-    if model_path.exists():
-        tf.keras.backend.clear_session()
-        gc.collect()
-        predictor = Predictor(model_path=str(model_path))
-        print("Model loaded successfully")
-    else:
-        print("No trained model found. Please train a model first.")
+# Load model on startup
+@app.on_event("startup")
+async def startup_event():
+    """Load model with memory optimization"""
+    global model
     
-    # Lazy load MobileNetV2 - only when needed
-    detector_model = None
-    print("Detector will be loaded on first prediction")
-except Exception as e:
-    print(f"Error loading model: {e}")
+    model_path = MODEL_DIR / 'cats_dogs_model.h5'
+    
+    if model_path.exists():
+        try:
+            # Clear any existing session
+            tf.keras.backend.clear_session()
+            gc.collect()
+            
+            # Load model without compiling
+            model = tf.keras.models.load_model(str(model_path), compile=False)
+            
+            # Recompile with minimal optimizer
+            model.compile(
+                optimizer='adam',
+                loss='binary_crossentropy',
+                metrics=['accuracy']
+            )
+            
+            print(f"Model loaded successfully from {model_path}")
+            print(f"Memory optimized for deployment")
+        except Exception as e:
+            print(f"Error loading model: {e}")
+            model = None
+    else:
+        print(f"Model file not found at {model_path}")
 
 
 # Pydantic models
@@ -241,18 +233,6 @@ async def get_dataset_stats():
     }
 
 
-def get_detector():
-    """Lazy load detector only when needed"""
-    global detector_model
-    if detector_model is None:
-        try:
-            print("Loading MobileNetV2 detector...")
-            detector_model = MobileNetV2(weights='imagenet', include_top=True)
-            print("MobileNetV2 detector loaded")
-        except Exception as e:
-            print(f"Error loading detector: {e}")
-    return detector_model
-
 @app.post("/api/predict")
 async def predict_image(file: UploadFile = File(...)):
     """Predict class for uploaded image"""
@@ -272,58 +252,7 @@ async def predict_image(file: UploadFile = File(...)):
         contents = await file.read()
         image = Image.open(io.BytesIO(contents)).convert('RGB')
         
-        # Step 1: Detect if image contains cat or dog using MobileNetV2
-        detector = get_detector()
-        if detector is not None:
-            detector_image = image.resize((224, 224))
-            detector_array = np.array(detector_image)
-            detector_array = np.expand_dims(detector_array, axis=0)
-            detector_array = preprocess_input(detector_array)
-            
-            # Get predictions from detector
-            detector_predictions = detector.predict(detector_array, verbose=0)
-            decoded = decode_predictions(detector_predictions, top=5)[0]
-            
-            # Clear memory
-            del detector_array, detector_predictions
-            gc.collect()
-            
-            # Check if any of top 5 predictions are cat or dog related
-            cat_dog_classes = [
-                'tabby', 'tiger_cat', 'persian_cat', 'siamese_cat', 'egyptian_cat',
-                'cougar', 'lynx', 'leopard', 'cheetah', 'jaguar', 'lion', 'tiger',
-                'pug', 'chihuahua', 'pomeranian', 'german_shepherd', 'golden_retriever',
-                'labrador_retriever', 'beagle', 'bulldog', 'boxer', 'rottweiler',
-                'dalmatian', 'saint_bernard', 'husky', 'great_dane', 'standard_poodle',
-                'terrier', 'yorkshire_terrier', 'cocker_spaniel', 'irish_setter',
-                'english_setter', 'border_collie', 'collie', 'malamute', 'kelpie',
-                'komondor', 'old_english_sheepdog', 'shetland_sheepdog', 'basenji',
-                'leonberg', 'newfoundland', 'great_pyrenees', 'samoyed',
-                'malinois', 'keeshond', 'brabancon_griffon', 'cardigan', 'pembroke',
-                'toy_poodle', 'miniature_poodle', 'white_wolf', 'red_wolf', 'coyote',
-                'dingo', 'african_hunting_dog', 'hyena', 'red_fox', 'kit_fox',
-                'arctic_fox', 'grey_fox', 'timber_wolf', 'mexican_hairless'
-            ]
-            
-            is_cat_or_dog = any(pred[1] in cat_dog_classes for pred in decoded)
-            max_confidence = max([pred[2] for pred in decoded])
-            
-            # If not cat/dog with reasonable confidence, return unknown
-            if not is_cat_or_dog and max_confidence > 0.3:
-                prediction_time = (time.time() - start_time)
-                detected_object = decoded[0][1].replace('_', ' ').title()
-                print(f"Image rejected: Detected {detected_object}")
-                return {
-                    "predicted_class": "unknown",
-                    "class": "unknown",
-                    "confidence": 0.0,
-                    "prediction_time": prediction_time,
-                    "is_valid": False,
-                    "detected_object": detected_object,
-                    "message": f"This appears to be: {detected_object}"
-                }
-        
-        # Step 2: If it is a cat/dog, use our trained model
+        # Use our trained model directly (detector removed to save memory)
         image_bytes = io.BytesIO(contents)
         img_array = preprocessor.preprocess_image_from_bytes(image_bytes)
         
