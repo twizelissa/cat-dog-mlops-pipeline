@@ -11,6 +11,8 @@ import sys
 import json
 import shutil
 import gc
+import time
+import io
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, List
@@ -236,9 +238,9 @@ async def get_dataset_stats():
 @app.post("/api/predict")
 async def predict_image(file: UploadFile = File(...)):
     """Predict class for uploaded image"""
-    global predictor
+    global model
     
-    if predictor is None:
+    if model is None:
         raise HTTPException(status_code=503, detail="Model not loaded")
     
     # Validate file type
@@ -248,26 +250,38 @@ async def predict_image(file: UploadFile = File(...)):
     try:
         start_time = time.time()
         
-        # Read image
+        # Read and preprocess image
         contents = await file.read()
         image = Image.open(io.BytesIO(contents)).convert('RGB')
+        image = image.resize((224, 224))  # VGG16 input size
         
-        # Use our trained model directly (detector removed to save memory)
-        image_bytes = io.BytesIO(contents)
-        img_array = preprocessor.preprocess_image_from_bytes(image_bytes)
+        # Convert to array and normalize
+        img_array = img_to_array(image)
+        img_array = np.expand_dims(img_array, axis=0)
+        img_array = img_array / 255.0  # Normalize to [0, 1]
         
         # Make prediction
-        result = predictor.predict_single(img_array)
+        prediction = model.predict(img_array, verbose=0)[0][0]
         
-        # Add prediction time
-        result['prediction_time'] = time.time() - start_time
-        result['is_valid'] = True
+        # Determine class
+        predicted_class = "dog" if prediction > 0.5 else "cat"
+        confidence = prediction if prediction > 0.5 else 1 - prediction
+        
+        result = {
+            "predicted_class": predicted_class,
+            "confidence": float(confidence),
+            "confidence_percentage": f"{confidence * 100:.2f}%",
+            "probability": float(prediction),
+            "prediction_time": time.time() - start_time,
+            "timestamp": datetime.now().isoformat(),
+            "is_valid": True
+        }
         
         # Update stats
         app_state['total_predictions'] += 1
         
         # Clear memory
-        del img_array, image_bytes
+        del img_array, image
         gc.collect()
         
         return result
