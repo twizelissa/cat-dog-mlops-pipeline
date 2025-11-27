@@ -2,6 +2,8 @@
 
 A production-ready machine learning operations pipeline for binary image classification using deep learning and transfer learning.
 
+![Cats vs Dogs Classifier](app/static/images/hero.png)
+
 ## Project Description
 
 This project demonstrates the complete machine learning lifecycle from data acquisition to production deployment. Built with VGG16 transfer learning, FastAPI backend, and Next.js frontend, it showcases industry-standard MLOps practices including automated retraining, performance monitoring, load testing, and cloud deployment.
@@ -10,7 +12,7 @@ This project demonstrates the complete machine learning lifecycle from data acqu
 
 ## Video Demonstration
 
-[YouTube Demo Link - To be added]
+**Watch Demo**: [https://www.bugufi.link/EkOKLU](https://www.bugufi.link/EkOKLU)
 
 ## Key Features
 
@@ -686,7 +688,7 @@ Educational project for academic purposes.
 
 ## Author
 
-Twize - Machine Learning Engineer
+**Elissa Twizeyimana** - Machine Learning Engineer
 
 **GitHub**: [twizelissa/cat-dog-mlops-pipeline](https://github.com/twizelissa/cat-dog-mlops-pipeline)
 
