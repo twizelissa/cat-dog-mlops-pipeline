@@ -8,11 +8,11 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Cache bust to force fresh install of dependencies (2024-11-27)
-ARG CACHEBUST=1
-
-# Copy Python requirements
+# Copy Python requirements (updated 2024-11-27 with pandas 2.2.0)
 COPY requirements-prod.txt .
+
+# Verify requirements content for debugging
+RUN echo "=== Requirements file content ===" && cat requirements-prod.txt && echo "=== End requirements ==="
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements-prod.txt
