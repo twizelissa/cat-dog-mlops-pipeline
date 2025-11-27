@@ -1,14 +1,14 @@
-# 🚀 Deployment Guide - Render
+# Deployment Guide - Render
 
 This guide will help you deploy the Cats vs Dogs ML classifier to Render with both backend API and frontend UI.
 
-## 📋 Prerequisites
+## Prerequisites
 
 1. **Render Account**: Sign up at [render.com](https://render.com)
 2. **GitHub Repository**: Push your code to GitHub
 3. **Trained Model**: Your `cats_dogs_model.h5` file (85MB)
 
-## 🔧 Deployment Steps
+## Deployment Steps
 
 ### Step 1: Prepare Your Repository
 
@@ -20,11 +20,11 @@ git push origin master
 ```
 
 2. **Verify these files exist**:
-   - ✅ `render.yaml` - Infrastructure configuration
-   - ✅ `requirements-prod.txt` - Production dependencies
-   - ✅ `build.sh` - Backend build script
-   - ✅ `frontend/package.json` - Frontend dependencies
-   - ✅ `frontend/next.config.js` - Next.js configuration
+   - `render.yaml` - Infrastructure configuration
+   - `requirements-prod.txt` - Production dependencies
+   - `build.sh` - Backend build script
+   - `frontend/package.json` - Frontend dependencies
+   - `frontend/next.config.js` - Next.js configuration
 
 ### Step 2: Deploy to Render
 
@@ -119,7 +119,7 @@ git push
    - Backend: `https://catdog-ml-backend.onrender.com/health`
    - Frontend: `https://catdog-ml-frontend.onrender.com`
 
-## 🔍 Troubleshooting
+## Troubleshooting
 
 ### Backend Issues
 
@@ -150,19 +150,19 @@ Solution: Update NEXT_PUBLIC_API_URL with correct backend URL
 Solution: Check Node version (18+), clear build cache, redeploy
 ```
 
-## 📊 Expected Deployment Times
+## Expected Deployment Times
 
 - **Backend**: 5-8 minutes (first deploy with TensorFlow installation)
 - **Frontend**: 2-4 minutes (first deploy with npm install)
 - **Subsequent deploys**: 1-3 minutes (cached dependencies)
 
-## 💰 Cost Estimates
+## Cost Estimates
 
 ### Free Tier (Recommended for Testing)
-- ✅ Both services free
-- ⚠️ Services sleep after 15 minutes of inactivity
-- ⚠️ 750 hours/month limit
-- ⚠️ First request after sleep takes 30-60 seconds
+- Both services free
+- Services sleep after 15 minutes of inactivity
+- 750 hours/month limit
+- First request after sleep takes 30-60 seconds
 
 ### Paid Tier (Production Ready)
 - **Starter ($7/month per service)**: 
@@ -174,7 +174,7 @@ Solution: Check Node version (18+), clear build cache, redeploy
   - 2GB RAM
   - Better for ML workloads
 
-## 🌐 Accessing Your Deployed App
+## Accessing Your Deployed App
 
 After successful deployment:
 
@@ -188,7 +188,7 @@ After successful deployment:
    - Predict: `/predict`
    - Retrain: `/retrain`
 
-## 🔐 Security Best Practices
+## Security Best Practices
 
 1. **Add CORS origins** in `app/main.py`:
 ```python
@@ -207,7 +207,7 @@ app.add_middleware(
 
 4. **Use environment variables** for sensitive data
 
-## 📱 Post-Deployment Checklist
+## Post-Deployment Checklist
 
 - [ ] Backend health check returns 200 OK
 - [ ] Frontend loads without errors
@@ -219,7 +219,7 @@ app.add_middleware(
 - [ ] CORS configured correctly
 - [ ] Custom domain configured (optional)
 
-## 🎥 Demo for Assignment
+## Demo for Assignment
 
 For your 5-point camera demo:
 1. Show the live deployed URLs
@@ -228,7 +228,7 @@ For your 5-point camera demo:
 4. Navigate through all pages (dashboard, predict, retrain)
 5. Show backend API responses in browser DevTools
 
-## 🚨 Important Notes
+## Important Notes
 
 1. **Free tier sleeps**: First request after 15 minutes takes ~30s to wake up
 2. **Model size**: 85MB model requires persistent disk or cloud storage
@@ -236,14 +236,14 @@ For your 5-point camera demo:
 4. **Memory**: Free tier has 512MB RAM - sufficient for this project
 5. **Bandwidth**: Free tier includes 100GB/month bandwidth
 
-## 🔄 Continuous Deployment
+## Continuous Deployment
 
 Once connected to GitHub:
 - Every push to `master` triggers automatic redeployment
 - You can disable auto-deploy and deploy manually
 - Use branches for testing before deploying to production
 
-## 📧 Support
+## Support
 
 If deployment fails:
 1. Check Render logs for specific errors
@@ -254,6 +254,6 @@ If deployment fails:
 
 ---
 
-**Good luck with your deployment! 🎉**
+**Good luck with your deployment!**
 
 For more details: [Render Documentation](https://render.com/docs)
